@@ -1,0 +1,39 @@
+#q3
+
+from statsmodels.stats.outliers_influence import OLSInfluence
+import matplotlib.pyplot as plt
+import numpy as np
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+import pandas as pd
+
+influence = OLSInfluence(model)
+dffits = influence.dffits[0]
+
+p = X.shape[1]
+n = len(df)
+dffits_threshold = 2 * np.sqrt(p / n)
+
+influential_dffits = np.abs(dffits) > dffits_threshold
+influential_observations_dffits = df[influential_dffits]
+
+print(f"DFFITS Threshold: {dffits_threshold:.4f}")
+print(f"\nNumber of potentially influential observations (based on DFFITS): {len(influential_observations_dffits)}")
+if not influential_observations_dffits.empty:
+    print("\nPotentially influential observations (first 5 based on DFFITS):\n", influential_observations_dffits.head())
+
+plt.figure(figsize=(12, 6))
+plt.plot(model.fittedvalues, dffits, marker='o', linestyle='')
+plt.axhline(y=dffits_threshold, color='r', linestyle='--', label=f"Threshold: +{dffits_threshold:.4f}")
+plt.axhline(y=-dffits_threshold, color='r', linestyle='--', label=f"Threshold: -{dffits_threshold:.4f}")
+plt.xlabel("Fitted Values")
+plt.ylabel("DFFITS")
+plt.title("DFFITS Plot")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+vif_data = pd.DataFrame()
+vif_data["feature"] = X.columns
+vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+
+print("\nCollinearity Diagnostics (Variance Inflation Factors - VIF):\n", vif_data)
