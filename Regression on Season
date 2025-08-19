@@ -1,0 +1,38 @@
+#regression on seasonal
+#Q2
+
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv("Seasonal_Rf_avg.csv")
+
+df.columns = df.columns.str.strip()
+
+df["total_fertilizer"] = df["nitrogenconsumptiontonnes"] + df["phosphateconsumptiontonnes"] + df["potashconsumptiontonnes"]
+df["unirrigated_area"] = df["area1000hectares"] - df["irrigatedarea1000hectares"]
+
+df["irrigated_plus1"] = df["irrigatedarea1000hectares"] + 1
+df["unirrigated_plus1"] = df["unirrigated_area"] + 1
+
+df["log_production"] = np.log(df["production1000tonnes"])
+df["log_area"] = np.log(df["area1000hectares"])
+df["log_fertilizer"] = np.log(df["total_fertilizer"])
+df["log_irrigated"] = np.log(df["irrigated_plus1"])
+df["log_unirrigated"] = np.log(df["unirrigated_plus1"])
+
+X = df[["log_area", "log_fertilizer", "log_irrigated", "log_unirrigated", "rf", "salinity"]]
+X = sm.add_constant(X)
+y = df["log_production"]
+
+model = sm.OLS(y, X).fit()
+print(model.summary())
+
+sns.residplot(x=model.fittedvalues, y=model.resid, lowess=True)
+plt.xlabel("Fitted values")
+plt.ylabel("Residuals")
+plt.title("Residuals vs Fitted")
+plt.axhline(0, linestyle='--', color='red')
+plt.show()
