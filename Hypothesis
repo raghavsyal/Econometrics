@@ -1,0 +1,37 @@
+
+
+import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+
+
+df = pd.read_csv("/content/Seasonal_Rf_avg.csv")
+
+df.rename(columns={
+    "nitrogenconsumptiontonnes": "nitrogen",
+    "phosphateconsumptiontonnes": "phosphate",
+    "potashconsumptiontonnes": "potash"
+}, inplace=True)
+
+df["nitrogen_sq"] = df["nitrogen"] ** 2
+df["phosphate_sq"] = df["phosphate"] ** 2
+df["potash_sq"] = df["potash"] ** 2
+df["irrigated_sq"] = df["irrigatedarea1000hectares"] ** 2
+df["area_sq"] = df["area1000hectares"] ** 2
+
+df["nitrogen_irrigated"] = df["nitrogen"] * df["irrigatedarea1000hectares"]
+df["phosphate_irrigated"] = df["phosphate"] * df["irrigatedarea1000hectares"]
+df["potash_irrigated"] = df["potash"] * df["irrigatedarea1000hectares"]
+
+
+model = smf.ols(
+    'production1000tonnes ~ nitrogen + nitrogen_sq + '
+    'phosphate + phosphate_sq + '
+    'potash + potash_sq+ '
+    'irrigatedarea1000hectares + irrigated_sq + '
+    'nitrogen_irrigated + phosphate_irrigated + potash_irrigated + '
+    'area1000hectares + area_sq',
+    data=df
+).fit()
+
+print(model.summary())
