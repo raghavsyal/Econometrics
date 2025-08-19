@@ -54,8 +54,7 @@ The project is executed in two main parts: **Data Preprocessing** and **Economet
 
 #### A. Cobb-Douglas Production Function
 - **Form:**  
-  ![Cobb-Douglas](https://latex.codecogs.com/svg.latex?Y%20=%20A%20X_1^{\alpha_1}X_2^{\alpha_2}\dots%20X_k^{\alpha_k})
- 
+  $Y = A X_1^{\alpha_1} X_2^{\alpha_2} \cdots X_K^{\alpha_K}$ 
 
 - **Model Specification:**  
   - Dependent variable: `log(production)`  
@@ -69,7 +68,7 @@ The project is executed in two main parts: **Data Preprocessing** and **Economet
 
 #### B. Quadratic Production Function
 - **Form:**  
-  $$ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_1^2 + \beta_3 X_2 + \beta_4 X_2^2 + \dots $$  
+  $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_1^2 + \beta_2 X_2 + \beta_3 X_2^2 + \dots$
 
 - **Model Specification:**  
   - Variables are kept in original levels  
