@@ -1,0 +1,34 @@
+#q4
+
+x_ar = df["log_area"]
+y_prod = df["log_production"]
+fitted = model.fittedvalues
+resid = model.resid
+
+plt.figure()
+plt.scatter(x_ar, y_prod)  # the actual points
+
+order = np.argsort(x_ar)
+plt.plot(x_ar.iloc[order], fitted.iloc[order], color="red")  # the fitted line
+
+plt.xlabel("Log(Area)")
+plt.ylabel("Log(Production)")
+plt.title("Log Production vs. Log Area  (vertical = residual)")
+
+plt.figure()
+plt.scatter(x_ar, resid)
+plt.axhline(0, linestyle="--", color="red")
+plt.xlabel("Log (Area)")
+plt.ylabel("Residual")
+plt.title("Residuals vs. Log Area")
+
+plt.figure()
+plt.hist(resid, bins=20)
+plt.xlabel("Residual")
+plt.ylabel("Frequency")
+plt.title("Histogram of Residuals")
+
+plt.show()
+
+print(f"Sum of residuals: {resid.sum():.8f}")
+
