@@ -1,0 +1,55 @@
+#task 1 and 2
+
+import pandas as pd
+
+pigeonpea_df = pd.read_csv("ECO221_Project_2025_Final.csv")
+rainfall_df = pd.read_csv("RF_DistrictWise_ECO221_2025.csv")
+soil_df = pd.read_csv("Salinity_Alkalinity_ECO221_2025.csv")
+
+pigeonpea_df.columns = pigeonpea_df.columns.str.lower().str.strip()
+rainfall_df.columns = rainfall_df.columns.str.lower().str.strip()
+soil_df.columns = soil_df.columns.str.lower().str.strip()
+
+pigeonpea_df.rename(columns={'districtname': 'district', 'statename': 'state'}, inplace=True)
+soil_df.rename(columns={'district name': 'district',
+                        'average salinity/alkalinity (percentage)': 'salinity'}, inplace=True)
+
+pigeonpea_df = pigeonpea_df[pigeonpea_df["crop"].str.lower() == "pigeonpea"]
+print(f"Rows with pigeonpea: {len(pigeonpea_df)}")
+
+pigeonpea_df["irrigatedarea1000hectares"] = pigeonpea_df[["irrigatedarea1000hectares", "area1000hectares"]].min(axis=1)
+
+for df in [pigeonpea_df, rainfall_df, soil_df]:
+    df["district"] = df["district"].str.lower().str.strip()
+    if "state" in df.columns:
+        df["state"] = df["state"].str.lower().str.strip()
+
+rainfall_df.drop(columns=["year"], inplace=True)
+rainfall_df.rename(columns={"yearcode": "year"}, inplace=True)
+rainfall_df["year"] = rainfall_df["year"].astype(int)
+pigeonpea_df["year"] = pigeonpea_df["year"].astype(int)
+
+rainfall_df["month_clean"] = rainfall_df["month"].astype(str).str.extract(r"^([A-Za-z]+)")
+rainfall_df["month_clean"] = rainfall_df["month_clean"].str.strip().str.lower()
+
+valid_months = ["june", "july", "august", "september", "october"]
+rainfall_df = rainfall_df[rainfall_df["month_clean"].isin(valid_months)]
+
+rainfall_avg = rainfall_df.groupby(["state", "district", "year"])["rf"].mean().reset_index()
+
+pigeonpea_df["area1000hectares"] = pd.to_numeric(pigeonpea_df["area1000hectares"], errors="coerce")
+pigeonpea_df = pigeonpea_df.dropna(subset=["area1000hectares"])
+
+merged_df = pigeonpea_df.merge(rainfall_avg, on=["state", "district", "year"], how="left")
+
+merged_df["rf"] = merged_df.groupby(["state", "year"])["rf"].transform(lambda x: x.fillna(x.mean()))
+
+merged_df = merged_df.merge(soil_df[["district", "salinity"]], on="district", how="left")
+
+merged_df["salinity"] = merged_df.groupby("state")["salinity"].transform(lambda x: x.fillna(x.mean()))
+
+merged_df.to_csv("Seasonal_Rf_avg.csv", index=False)
+print("\nFinal seasonal merge completed and cleaned.")
+
+print("\nNull values in final file:")
+print(merged_df[["rf", "salinity"]].isnull().sum())
